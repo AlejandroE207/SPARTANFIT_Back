@@ -30,6 +30,7 @@ namespace SPARTANFIT.Repository
                         await cmd.ExecuteNonQueryAsync();
                         comando = 1; 
                     }
+                    await con.CloseAsync();
                 }
             }
             catch (Exception ex)
@@ -68,6 +69,7 @@ namespace SPARTANFIT.Repository
                             }
                         }
                     }
+                    await con.CloseAsync() ;
                 }
             }
             catch (Exception ex)
@@ -97,6 +99,7 @@ namespace SPARTANFIT.Repository
                         await cmd.ExecuteNonQueryAsync();
                         filasAfectadas = 1; 
                     }
+                    await con.CloseAsync();
                 }
             }
             catch (Exception ex)
@@ -127,6 +130,7 @@ namespace SPARTANFIT.Repository
                             personaID = Convert.ToInt32(result);
                         }
                     }
+                    await con.CloseAsync();
                 }
             }
             catch (Exception ex)

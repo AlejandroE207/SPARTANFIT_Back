@@ -59,16 +59,13 @@ namespace SPARTANFIT.Repository
                             }
                         }
                     }
+                    await con.CloseAsync();
                 }
             }
             catch (Exception ex)
             {
-
                 Console.WriteLine("Error al iniciar sesión: " + ex.Message);
                 return null;
-
-
-
             }
             return null;
         }
@@ -90,6 +87,7 @@ namespace SPARTANFIT.Repository
                         await cmd.ExecuteNonQueryAsync();
                         comando = 1;
                     }
+                    await con.CloseAsync();
                 }
             }
             catch (Exception ex)
@@ -115,6 +113,7 @@ namespace SPARTANFIT.Repository
 
                         personaEncontrada = (int)await cmd.ExecuteScalarAsync();
                     }
+                    await con.CloseAsync();
                 }
             }
             catch (Exception ex)
@@ -160,6 +159,7 @@ namespace SPARTANFIT.Repository
                             }
                         }
                     }
+                    await con.CloseAsync();
                 }
             }
             catch (Exception ex)
@@ -204,6 +204,7 @@ namespace SPARTANFIT.Repository
                             }
                         }
                     }
+                    await con.CloseAsync();
                 }
             }
             catch (Exception ex)
