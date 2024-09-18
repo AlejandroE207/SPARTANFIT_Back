@@ -45,7 +45,15 @@ builder.Services.AddScoped<Recuperacion_ContrasenaRepository>(provider =>
     return new Recuperacion_ContrasenaRepository(connectionString);
 });
 
+builder.Services.AddScoped<EntrenadorRepository>(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    var connectionString = configuration.GetConnectionString("DefaultConnection");
+    return new EntrenadorRepository(connectionString);
+});
+
 builder.Services.AddScoped<PersonaService>();
+builder.Services.AddScoped<AdministradorService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
