@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SPARTANFIT.Dto;
 using SPARTANFIT.Services;
+using System.ComponentModel.DataAnnotations.Schema;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -43,6 +44,53 @@ namespace SPARTANFIT.Controllers
             }
 
             return Ok(listEntrenadores);
+
+        }
+
+        [HttpPost("RegistrarEntrenador")]
+        public async Task<IActionResult> Registrar_entrenador([FromBody]PersonaDto entrenador)
+        {
+            int resultado = 0;
+            resultado = await _administradorService.Registrar_Entrenadores(entrenador);
+            if(resultado == 0)
+            {
+                return NotFound("Problema en registro del entrenador");
+            }
+            else
+            {
+                return Ok(new {mensaje = "Entrenador registrado exitosamente"});
+
+            }
+        }
+
+        [HttpPost("ActualizarEntrenador")]
+        public async Task<IActionResult> Actualizar_entrenador([FromBody]PersonaDto entrenador)
+        {
+            int resultado = 0;
+            resultado = await _administradorService.Actualizar_Entrenador(entrenador);
+            if(resultado == 0)
+            {
+                return NotFound("Problema en actualizar entrenador");
+            }
+            else
+            {
+                return Ok(new {mensaje="Datos actualizados exitosamente!"});
+            }
+        }
+
+        [HttpPost("EliminarEntrenador")]
+        public async Task<IActionResult> Eliminar_Entrenador([FromQuery]int id)
+        {
+            int resultado = 0;
+            resultado = await _administradorService.Eliminar_Entrenador(id);
+            if (resultado == 0)
+            {
+                return NotFound("Error al eliminar entrenador!");
+            }
+            else
+            {
+                return Ok(new { mensaje = "Entrenador Eliminado exitosamente!!" });
+            }
 
         }
     }
