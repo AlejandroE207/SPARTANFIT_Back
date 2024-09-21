@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using SPARTANFIT.Dto;
 using SPARTANFIT.Repository;
+using SPARTANFIT.Utilitys;
 
 namespace SPARTANFIT.Services
 {
@@ -27,6 +28,42 @@ namespace SPARTANFIT.Services
             List<PersonaDto> listEntrenadores = new List<PersonaDto>();
             listEntrenadores = await _entrenadorRepository.Mostrar_Entrenadores();
             return listEntrenadores;
+        }
+
+        public async Task<int> Registrar_Entrenadores(PersonaDto entrenador)
+        {
+            int resultado = 0;
+            SintetizarFormulariosUtility sintetizar = new SintetizarFormulariosUtility();
+            HashUtility hashUtility = new HashUtility();
+            entrenador.nombres = sintetizar.Sintetizar(entrenador.nombres);
+            entrenador.apellidos = sintetizar.Sintetizar(entrenador.apellidos);
+            entrenador.correo = sintetizar.Sintetizar(entrenador.correo);
+            entrenador.contrasena = hashUtility.HashPassword(entrenador.contrasena);
+
+            resultado =await  _entrenadorRepository.Registrar_Entrenador(entrenador);
+
+            return resultado;
+        }
+
+        public async Task<int> Actualizar_Entrenador(PersonaDto entrenador)
+        {
+            int resultado = 0;
+            SintetizarFormulariosUtility sintetizar = new SintetizarFormulariosUtility();
+            HashUtility hashUtility = new HashUtility();
+            entrenador.nombres = sintetizar.Sintetizar(entrenador.nombres);
+            entrenador.apellidos = sintetizar.Sintetizar(entrenador.apellidos);
+            entrenador.correo = sintetizar.Sintetizar(entrenador.correo);
+            entrenador.contrasena = hashUtility.HashPassword(entrenador.contrasena);
+
+            resultado = await _entrenadorRepository.Actualizar_Entrenador(entrenador);
+            return resultado;
+        }
+
+        public async Task<int> Eliminar_Entrenador(int id_entrenador)
+        {
+            int resultado = 0;
+            resultado = await _entrenadorRepository.Eliminar_Entrenador(id_entrenador);
+            return resultado;
         }
     }
 }
