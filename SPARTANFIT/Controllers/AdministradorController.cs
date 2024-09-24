@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 using SPARTANFIT.Dto;
 using SPARTANFIT.Services;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -64,9 +65,14 @@ namespace SPARTANFIT.Controllers
         }
 
         [HttpPost("ActualizarEntrenador")]
-        public async Task<IActionResult> Actualizar_entrenador([FromBody]PersonaDto entrenador)
+        public async Task<IActionResult> Actualizar_entrenador([FromForm]int id_usuario, [FromForm]string nombres, [FromForm]string apellidos, [FromForm]string correo)
         {
             int resultado = 0;
+            PersonaDto entrenador = new PersonaDto();
+            entrenador.id_usuario = id_usuario;
+            entrenador.nombres = nombres;
+            entrenador.apellidos = apellidos;
+            entrenador.correo= correo;
             resultado = await _administradorService.Actualizar_Entrenador(entrenador);
             if(resultado == 0)
             {
@@ -91,7 +97,35 @@ namespace SPARTANFIT.Controllers
             {
                 return Ok(new { mensaje = "Entrenador Eliminado exitosamente!!" });
             }
-
         }
+
+        [HttpGet("ReporteUsuarios")]
+        public async Task<IActionResult> Generar_Reporte_Usuarios()
+        {
+            string tempFilePath = Path.Combine(Path.GetTempPath(), "Lista_Usuarios.pdf");
+
+            await _administradorService.CrearPdfUsuarios();
+
+            var pdfBytes = await System.IO.File.ReadAllBytesAsync(tempFilePath);
+
+            System.IO.File.Delete(tempFilePath);
+
+            return File(pdfBytes, "application/pdf", "Lista_Usuarios.pdf");
+        }
+
+        [HttpGet("ReporteEntrenadores")]
+        public async Task<IActionResult> Generar_Reporte_Entrenadores()
+        {
+            string tempFilePath = Path.Combine(Path.GetTempPath(), "Lista_Entrenadores.pdf");
+
+            await _administradorService.CrearPdfEntrenadores();
+
+            var pdfBytes = await System.IO.File.ReadAllBytesAsync(tempFilePath);
+
+            System.IO.File.Delete(tempFilePath);
+
+            return File(pdfBytes, "application/pdf", "Lista_Entrenadores.pdf");
+        }
+
     }
 }

@@ -53,7 +53,6 @@ namespace SPARTANFIT.Services
             entrenador.nombres = sintetizar.Sintetizar(entrenador.nombres);
             entrenador.apellidos = sintetizar.Sintetizar(entrenador.apellidos);
             entrenador.correo = sintetizar.Sintetizar(entrenador.correo);
-            entrenador.contrasena = hashUtility.HashPassword(entrenador.contrasena);
 
             resultado = await _entrenadorRepository.Actualizar_Entrenador(entrenador);
             return resultado;
@@ -64,6 +63,26 @@ namespace SPARTANFIT.Services
             int resultado = 0;
             resultado = await _entrenadorRepository.Eliminar_Entrenador(id_entrenador);
             return resultado;
+        }
+
+        public async Task<string> CrearPdfUsuarios()
+        {
+            ReporteUtility reporte = new ReporteUtility();
+            var lista = await Mostrar_Usuario();
+            string tempFilePath = Path.Combine(Path.GetTempPath(), "Lista_Usuarios.pdf");
+            reporte.CrearPdfUsuarios(lista, tempFilePath);
+            return tempFilePath;
+        }
+
+        public async Task<string> CrearPdfEntrenadores()
+        {
+            ReporteUtility reporte = new ReporteUtility();
+            var lista = await Mostrar_Entrenadores();
+
+            string tempFilePath = Path.Combine(Path.GetTempPath(), "Lista_Entrenadores.pdf");
+            reporte.CrearPdfDeEntrenadores(lista, tempFilePath);
+
+            return tempFilePath;
         }
     }
 }

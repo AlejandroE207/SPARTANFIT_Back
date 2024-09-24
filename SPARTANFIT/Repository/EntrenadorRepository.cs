@@ -17,7 +17,7 @@ namespace SPARTANFIT.Repository
         public async Task<List<PersonaDto>> Mostrar_Entrenadores()
         {
             List<PersonaDto> listEntrenadores = new List<PersonaDto>();
-            string sql = "SELECT  id_usuario, id_rol,nombres, apellidos, correo, contrasena, fecha_nacimiento, genero FROM USUARIO WHERE id_rol=2";
+            string sql = "SELECT  id_usuario,nombres, apellidos, correo, fecha_nacimiento, genero FROM USUARIO WHERE id_rol=2";
             using (SqlConnection con = new SqlConnection(_connectionString))
             {
                 await con.OpenAsync();
@@ -30,11 +30,9 @@ namespace SPARTANFIT.Repository
                             PersonaDto entrenador = new PersonaDto
                             {
                                 id_usuario = Convert.ToInt32(reader["id_usuario"]),
-                                id_rol = Convert.ToInt32(reader["id_rol"]),
                                 nombres = reader["nombres"].ToString(),
                                 apellidos = reader["apellidos"].ToString(),
                                 correo = reader["correo"].ToString(),
-                                contrasena = reader["contrasena"].ToString(),
                                 fecha_nacimiento = reader["fecha_nacimiento"].ToString(),
                                 genero = reader["genero"].ToString()
                             };
@@ -86,8 +84,7 @@ namespace SPARTANFIT.Repository
             int resultado = 0;
             try
             {
-                string sql = "UPDATE USUARIO SET nombres = @nombres, apellidos = @apellidos, correo = @correo, contrasena=@contrasena, genero=@genero, peso = NULL, estatura = NULL, id_nivel_entrenamiento = NULL, id_objetivo = NULL, rehabilitacion = NULL " 
-                    + "WHERE id_usuario = @id_usuario";
+                string sql = "UPDATE USUARIO SET nombres = @nombres, apellidos = @apellidos, correo = @correo WHERE id_usuario = @id_usuario";
                 using (SqlConnection con = new SqlConnection(_connectionString))
                 {
                     await con.OpenAsync();
@@ -96,8 +93,6 @@ namespace SPARTANFIT.Repository
                         cmd.Parameters.AddWithValue("@nombres", entrenador.nombres);
                         cmd.Parameters.AddWithValue("@apellidos", entrenador.apellidos);
                         cmd.Parameters.AddWithValue("@correo", entrenador.correo);
-                        cmd.Parameters.AddWithValue("@contrasena", entrenador.contrasena);
-                        cmd.Parameters.AddWithValue("@genero", entrenador.genero);
                         cmd.Parameters.AddWithValue("@id_usuario", entrenador.id_usuario);
 
                         await cmd.ExecuteNonQueryAsync();
