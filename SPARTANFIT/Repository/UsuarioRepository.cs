@@ -102,5 +102,5 @@ namespace SPARTANFIT.Repository
             return listUsuarios;
         }
     }
-    
+
 }

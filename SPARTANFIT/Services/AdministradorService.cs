@@ -33,14 +33,16 @@ namespace SPARTANFIT.Services
         public async Task<int> Registrar_Entrenadores(PersonaDto entrenador)
         {
             int resultado = 0;
+            BinarioUtility binarioUtility = new BinarioUtility();
             SintetizarFormulariosUtility sintetizar = new SintetizarFormulariosUtility();
             HashUtility hashUtility = new HashUtility();
             entrenador.nombres = sintetizar.Sintetizar(entrenador.nombres);
             entrenador.apellidos = sintetizar.Sintetizar(entrenador.apellidos);
             entrenador.correo = sintetizar.Sintetizar(entrenador.correo);
+            entrenador.contrasena=binarioUtility.ConvertirBinarioAString(entrenador.contrasena);
             entrenador.contrasena = hashUtility.HashPassword(entrenador.contrasena);
 
-            resultado =await  _entrenadorRepository.Registrar_Entrenador(entrenador);
+            resultado = await _entrenadorRepository.Registrar_Entrenador(entrenador);
 
             return resultado;
         }
