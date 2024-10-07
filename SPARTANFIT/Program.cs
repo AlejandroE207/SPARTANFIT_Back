@@ -52,8 +52,16 @@ builder.Services.AddScoped<EntrenadorRepository>(provider =>
     return new EntrenadorRepository(connectionString);
 });
 
+builder.Services.AddScoped<EjercicioRepository>(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    var connectionString = configuration.GetConnectionString("DefaultConnection");
+    return new EjercicioRepository(connectionString);
+});
+
 builder.Services.AddScoped<PersonaService>();
 builder.Services.AddScoped<AdministradorService>();
+builder.Services.AddScoped<EntrenadorService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

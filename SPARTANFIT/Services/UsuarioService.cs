@@ -1,4 +1,5 @@
-﻿using SPARTANFIT.Dto;
+﻿
+using SPARTANFIT.Dto;
 using SPARTANFIT.Repository;
 using SPARTANFIT.Services;
 using SPARTANFIT.Utilitys;
@@ -27,10 +28,16 @@ namespace SPARTANFIT.Services
             usu = await _usuarioRepository.RegistroUsuarioAsync(usuario);
             return usuario;
         }
-        public async Task <bool> BuscarPersona(string correo)
+        public async Task<bool> BuscarPersona(string correo)
         {
-           return await _usuarioRepository.BuscarUsuario(correo);
+            return await _usuarioRepository.BuscarUsuario(correo);
         }
-       
+
+        public async Task<UsuarioDto> EnviarDatosUsu(int id_usuario)
+        {
+            UsuarioDto usuario = await _usuarioRepository.SeleccionarUsuarioAsync(id_usuario);
+            return usuario;
+        }
+
     }
 }
