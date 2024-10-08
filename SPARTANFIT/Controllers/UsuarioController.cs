@@ -40,5 +40,31 @@ namespace SPARTANFIT_BACKEND.Controllers
             }
         }
 
+        [HttpGet("Traer-Datos-Usuario")]
+        public async Task<IActionResult> ObtenerDatosPersona([FromQuery] int id_usuario)
+        {
+            var usuario = await _usuarioService.EnviarDatosUsu(id_usuario);
+
+            if (usuario == null)
+            {
+                return NotFound("Usuario no encontrada.");
+            }
+
+
+            return Ok(new
+            {
+
+                nombres = usuario.persona.nombres,
+                apellidos = usuario.persona.apellidos,
+                fecha_nacimiento = usuario.persona.fecha_nacimiento,
+                genero = usuario.persona.genero,
+                estatura = usuario.estatura,
+                peso = usuario.peso,
+                id_objetivo = usuario.id_objetivo,
+                nivel_entrenamiento = usuario.id_nivel_entrenamiento,
+                rehabilitacion = usuario.rehabilitacion,
+            });
+        }
+
     }
 }

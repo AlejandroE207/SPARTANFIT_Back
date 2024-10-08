@@ -101,6 +101,61 @@ namespace SPARTANFIT.Repository
             }
             return listUsuarios;
         }
+
+        public async Task<UsuarioDto> SeleccionarUsuarioAsync(int id_usuario)
+        {
+            UsuarioDto usuario = null;
+            PersonaDto persona = null;
+            UsuarioDto personaResp = new UsuarioDto();
+            string query = "SELECT id_usuario, nombres, apellidos, correo, fecha_nacimiento, estatura, peso, genero, id_nivel_entrenamiento, id_objetivo, rehabilitacion FROM USUARIO WHERE id_usuario = @id_usuario";
+
+            try
+            {
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@id_usuario", id_usuario);
+
+                        using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                usuario = new UsuarioDto
+                                {
+                                    persona = new PersonaDto
+                                    {
+                                        nombres = reader["nombres"].ToString(),
+                                        apellidos = reader["apellidos"].ToString(),
+                                        fecha_nacimiento = reader["fecha_nacimiento"].ToString(),
+                                        genero = reader["genero"].ToString()
+                                    },
+                                    estatura = Convert.ToDouble(reader["estatura"]),
+                                    peso = Convert.ToDouble(reader["peso"]),
+                                    id_nivel_entrenamiento = Convert.ToInt32(reader["id_nivel_entrenamiento"]),
+                                    id_objetivo = Convert.ToInt32(reader["id_objetivo"]),
+                                    rehabilitacion = Convert.ToInt32(reader["rehabilitacion"]),
+                                };
+
+                                return usuario;
+                            }
+                            else
+                            {
+                                return personaResp;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return usuario;
+        }
     }
+
     
 }

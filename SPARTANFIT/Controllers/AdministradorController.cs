@@ -13,10 +13,12 @@ namespace SPARTANFIT.Controllers
     public class AdministradorController : ControllerBase
     {
         private readonly AdministradorService _administradorService;
+        private readonly UsuarioService _usuarioService;
 
-        public AdministradorController(AdministradorService administradorService)
+        public AdministradorController(AdministradorService administradorService, UsuarioService usuarioService)
         {
             _administradorService = administradorService;
+            _usuarioService = usuarioService;
         }
 
         [HttpGet("ListUsuarios")]
@@ -52,16 +54,24 @@ namespace SPARTANFIT.Controllers
         public async Task<IActionResult> Registrar_entrenador([FromBody]PersonaDto entrenador)
         {
             int resultado = 0;
-            resultado = await _administradorService.Registrar_Entrenadores(entrenador);
-            if(resultado == 0)
+
+            if(await _usuarioService.BuscarPersona(entrenador.correo))
             {
-                return NotFound("Problema en registro del entrenador");
+                return BadRequest("Entrenador ya existente");
             }
             else
             {
-                return Ok(new {mensaje = "Entrenador registrado exitosamente"});
-
+                resultado = await _administradorService.Registrar_Entrenadores(entrenador);
+                if(resultado == 0)
+                {
+                    return NotFound("Problema en registro del entrenador");
+                }
+                else
+                {
+                    return Ok(new {mensaje = "Entrenador registrado exitosamente"});
+                }
             }
+
         }
 
         [HttpPost("ActualizarEntrenador")]
