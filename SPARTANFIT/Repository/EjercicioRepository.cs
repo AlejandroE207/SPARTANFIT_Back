@@ -32,6 +32,7 @@ namespace SPARTANFIT.Repository
                         int ejercicioEncontrado = (int)await cmd.ExecuteScalarAsync();
                         return ejercicioEncontrado > 0;
                     }
+                    await con.OpenAsync();
                 }
             }
             catch (SqlException ex)

@@ -34,7 +34,7 @@ namespace SPARTANFIT.Controllers
         }
 
         [HttpPost("EliminarEjercicio")]
-        public async Task<IActionResult> EliminarEjercicio([FromForm]int id_ejercicio)
+        public async Task<IActionResult> EliminarEjercicio([FromQuery]int id_ejercicio)
         {
             int resultado = 0;
             resultado = await _entrenadorService.EliminarEjercicio(id_ejercicio);
