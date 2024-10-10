@@ -52,9 +52,19 @@ namespace SPARTANFIT.Controllers
         }
 
         [HttpPost("ActualizarAlimento")]
-        public async Task<IActionResult> ActualizarAlimento([FromBody]AlimentoDto alimento)
+        public async Task<IActionResult> ActualizarAlimento([FromForm]int id_alimento, [FromForm]int id_categoria_alimento, [FromForm] string nombre, [FromForm] double calorias_x_gramo,
+            [FromForm] double grasa, [FromForm] double carbohidrato, [FromForm] double proteina, [FromForm] double fibra)
         {
             int resultado = 0;
+            AlimentoDto alimento = new AlimentoDto();
+            alimento.id_alimento = id_alimento;
+            alimento.id_categoria_alimento = id_categoria_alimento;
+            alimento.nombre = nombre;
+            alimento.calorias_x_gramo = calorias_x_gramo;
+            alimento.grasa = grasa;
+            alimento.carbohidrato = carbohidrato;
+            alimento.proteina = proteina;
+            alimento.fibra = fibra;
             resultado = await _entrenadorService.ActualizarAlimento(alimento);
             if(resultado == 0)
             {
