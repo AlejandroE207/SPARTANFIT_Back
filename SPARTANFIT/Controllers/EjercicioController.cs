@@ -34,7 +34,7 @@ namespace SPARTANFIT.Controllers
         }
 
         [HttpPost("EliminarEjercicio")]
-        public async Task<IActionResult> EliminarEjercicio([FromForm]int id_ejercicio)
+        public async Task<IActionResult> EliminarEjercicio([FromQuery]int id_ejercicio)
         {
             int resultado = 0;
             resultado = await _entrenadorService.EliminarEjercicio(id_ejercicio);
@@ -49,9 +49,14 @@ namespace SPARTANFIT.Controllers
         }
 
         [HttpPost("ActualizarEjercicio")]
-        public async Task<IActionResult> ActualizarEjercicio([FromBody] EjercicioDto ejercicio)
+        public async Task<IActionResult> ActualizarEjercicio([FromForm] int id_ejercicio, [FromForm] string nombre_ejercicio, [FromForm] int id_grupo_muscular, [FromForm] string apoyo_visual )
         {
             int resultado = 0;
+            EjercicioDto ejercicio = new EjercicioDto();
+            ejercicio.id_ejercicio = id_ejercicio;
+            ejercicio.nombre_ejercicio = nombre_ejercicio;
+            ejercicio.id_grupo_muscular = id_grupo_muscular;
+            ejercicio.apoyo_visual = apoyo_visual;
             resultado = await _entrenadorService.ActualizarEjercicio(ejercicio);
             if(resultado == 0)
             {

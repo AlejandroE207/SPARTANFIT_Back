@@ -7,9 +7,11 @@ namespace SPARTANFIT.Services
     public class EntrenadorService
     {
         private readonly EjercicioRepository _ejercicioRepository;
-        public EntrenadorService (EjercicioRepository _ejericioRepository)
+        private readonly AlimentoRepository _alimentoRepository;
+        public EntrenadorService (EjercicioRepository _ejericioRepository, AlimentoRepository alimentoRepository)
         {
             _ejercicioRepository = _ejericioRepository;
+            _alimentoRepository = alimentoRepository;
         }
 
 
@@ -55,6 +57,44 @@ namespace SPARTANFIT.Services
             listEjercicios = await _ejercicioRepository.MostrarEjercicios();
             return listEjercicios;
         }
+
+        //--------------------ALIMENTOS------------------------------
+        public async Task<List<AlimentoDto>> MostrarAlimentos()
+        {
+            List<AlimentoDto> listAlimentos = new List<AlimentoDto>();
+            listAlimentos = await _alimentoRepository.MostrarAlimentos();
+            return listAlimentos; 
+        }
+
+        public async Task<int> RegistrarAlimento(AlimentoDto alimento)
+        {
+            SintetizarFormulariosUtility sintetizar = new SintetizarFormulariosUtility();
+            int resultado = 0;
+            alimento.nombre = sintetizar.Sintetizar(alimento.nombre);
+            if (await _alimentoRepository.BuscarAlimento(alimento.nombre)){
+                return resultado = 0;
+            }
+            else
+            {
+                resultado = await _alimentoRepository.RegistrarAlimento(alimento);
+            }
+            return resultado;
+        }
+
+        public async Task<int>ActualizarAlimento(AlimentoDto alimento)
+        {
+            int resultado = 0;
+            SintetizarFormulariosUtility sintetizar = new SintetizarFormulariosUtility();
+            alimento.nombre = sintetizar.Sintetizar(alimento.nombre);
+            resultado = await _alimentoRepository.ActualizarAlimento(alimento);
+            return resultado;
+        }
         
+        public async Task<int>EliminarAlimento(int id_alimento)
+        {
+            int resultado = 0;
+            resultado = await _alimentoRepository.EliminarAlimento(id_alimento);
+            return resultado;
+        }
     }
 }
