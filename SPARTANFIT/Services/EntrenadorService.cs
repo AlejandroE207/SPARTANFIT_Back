@@ -8,10 +8,12 @@ namespace SPARTANFIT.Services
     {
         private readonly EjercicioRepository _ejercicioRepository;
         private readonly AlimentoRepository _alimentoRepository;
-        public EntrenadorService (EjercicioRepository _ejericioRepository, AlimentoRepository alimentoRepository)
+        private readonly RutinaRepository _rutinaRepository;
+        public EntrenadorService (EjercicioRepository _ejericioRepository, AlimentoRepository alimentoRepository, RutinaRepository rutinaRepository)
         {
             _ejercicioRepository = _ejericioRepository;
             _alimentoRepository = alimentoRepository;
+            _rutinaRepository = rutinaRepository;
         }
 
 
@@ -96,5 +98,21 @@ namespace SPARTANFIT.Services
             resultado = await _alimentoRepository.EliminarAlimento(id_alimento);
             return resultado;
         }
+        //-------------------------RUTINA-------------------------------
+        public async Task<int>RegistrarRutina(RutinaDto rutina, List<EjercicioDto> ejerciciosRutina)
+        {
+            SintetizarFormulariosUtility sintetizar = new SintetizarFormulariosUtility();
+            rutina.nombre_rutina = sintetizar.Sintetizar(rutina.nombre_rutina);
+            rutina.descripcion = sintetizar.Sintetizar(rutina.descripcion);
+
+            int id_rutina = await _rutinaRepository.RegistrarRutina(rutina);
+            int resultadoEjerRut = await _rutinaRepository.RegistrarEjerciciosRutina(ejerciciosRutina, id_rutina);
+            return resultadoEjerRut;
+        }
+        /*
+        public async Task<List<RutinaDto>> MostrarRutinas()
+        {
+
+        }*/
     }
 }
