@@ -73,6 +73,12 @@ builder.Services.AddScoped<RutinaRepository>(provider =>
     return new RutinaRepository(connectionString);
 });
 
+builder.Services.AddScoped<PlanAlimenticioRepository>(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    var connectionString = configuration.GetConnectionString("DefaultConnection");
+    return new PlanAlimenticioRepository(connectionString);
+});
 
 builder.Services.AddScoped<PersonaService>();
 builder.Services.AddScoped<AdministradorService>();

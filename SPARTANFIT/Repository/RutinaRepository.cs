@@ -109,15 +109,127 @@ namespace SPARTANFIT.Repository
             }
             return resultado;
         }
-        /*
+        
         public async Task<List<RutinaDto>> MostrarRutinas()
         {
             List<RutinaDto> listRutinas = new List<RutinaDto>();
             try
             {
                 string sql ="SELECT id_rutina, id_nivel_rutina, id_objetivo, nombre_rutina, dia, descripcion FROM RUTINA";
-                using (SqlConnection con = new SqlConnection())
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        using(SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read()) 
+                            {
+                                RutinaDto rutina = new RutinaDto()
+                                {
+                                    id_rutina = Convert.ToInt32(reader["id_rutina"]),
+                                    id_nivel_rutina = Convert.ToInt32(reader["id_nivel_rutina"]),
+                                    id_objetivo = Convert.ToInt32(reader["id_objetivo"]),
+                                    nombre_rutina = reader["nombre_rutina"].ToString(),
+                                    dia = reader["dia"].ToString(),
+                                    descripcion = reader["descripcion"].ToString()
+                                };
+                                listRutinas.Add(rutina);
+                            }
+                        }
+                    }
+                    await con.CloseAsync();
+                }
             }
-        }*/
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return listRutinas;
+        }
+
+        public async Task<int> EliminarRutina(int id_rutina)
+        {
+            int resultado = 0;
+            try
+            {
+                resultado = await EliminarUsuarioRutina(id_rutina);
+                if(resultado != 0)
+                {
+                    resultado = await EliminarRutinaEjercicio(id_rutina);
+                    if(resultado != 0)
+                    {
+                        string sql = "DELETE FROM RUTINA WHERE id_rutina = @id_rutina";
+                        using (SqlConnection con = new SqlConnection(_connectionString))
+                        {
+                            await con.OpenAsync();
+                            using (SqlCommand cmd = new SqlCommand(sql, con))
+                            {
+                                cmd.Parameters.AddWithValue("@id_rutina", id_rutina);
+                                cmd.ExecuteNonQuery();
+                            }
+                            await con.CloseAsync();
+                        }
+                        resultado = 1;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return resultado;
+        }
+
+
+        public async Task<int> EliminarUsuarioRutina(int id_rutina)
+        {
+            int resultado = 0;
+            try
+            {
+                string sql = "DELETE FROM USUARIO_RUTINA WHERE id_rutina = @id_rutina";
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@id_rutina", id_rutina);
+                        cmd.ExecuteNonQuery();
+                    }
+                    await con.CloseAsync();
+                }
+                resultado = 1;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return resultado;
+        }
+
+        public async Task<int> EliminarRutinaEjercicio(int id_rutina)
+        {
+            int resultado = 0;
+            try
+            {
+                string sql = "DELETE FROM RUTINA_EJERCICIO WHERE id_rutina = @id_rutina";
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    using(SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@id_rutina", id_rutina);
+                        cmd.ExecuteNonQuery();
+                    }
+                    await con.CloseAsync();
+                }
+                resultado = 1;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return resultado;
+        }
     }
 }
