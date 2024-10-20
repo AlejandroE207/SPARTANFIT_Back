@@ -83,7 +83,7 @@ namespace SPARTANFIT.Repository
                 using (SqlConnection con = new SqlConnection(_connectionString))
                 {
                     await con.OpenAsync();
-                    foreach(int alimento in idAlimentos)
+                    foreach (int alimento in idAlimentos)
                     {
                         string sql = "INSERT INTO PLAN_ALIMENTO (id_plan_alimenticio, id_alimento)" +
                                 "VALUES (@id_plan_alimenticio, @id_alimento)";
@@ -115,7 +115,7 @@ namespace SPARTANFIT.Repository
                     await con.OpenAsync();
                     using (SqlCommand cmd = new SqlCommand(sql, con))
                     {
-                        using(SqlDataReader reader = cmd.ExecuteReader())
+                        using (SqlDataReader reader = cmd.ExecuteReader())
                         {
                             while (reader.Read())
                             {
@@ -221,6 +221,211 @@ namespace SPARTANFIT.Repository
                 Console.WriteLine(ex.Message);
             }
             return resultado;
+        }
+
+        public async Task<int> AsignarPlanAlimenticio(UsuarioDto usuario)
+        {
+            int resultado = 0;
+            double TMB = 0;
+            try
+            {
+                DateTime fechaActual = DateTime.Now;
+                int añoActual = fechaActual.Year;
+                DateTime fechaNacimiento = DateTime.Parse(usuario.persona.fecha_nacimiento);
+                int añoNacimiento = fechaNacimiento.Year;
+                double calorias = 0;
+                double edad = añoActual - añoNacimiento;
+                if (usuario.rehabilitacion == 1)
+                {
+                    usuario.id_objetivo = 2;
+                }
+                if (usuario.persona.genero == "masculino")
+                {
+
+                    TMB = 66 + (13.7 * usuario.peso) + (5 * usuario.estatura) - (6.8 * edad);
+
+                    switch (usuario.id_objetivo)
+                    {
+                        case 1:
+                            calorias = TMB + 734;
+                            break;
+                        case 2:
+                            calorias = TMB + 1270;
+                            break;
+                        case 3:
+                            calorias = TMB + 1810;
+                            break;
+                        case 4:
+                            calorias = TMB + 1810;
+                            break;
+                    }
+                }
+                else
+                {
+                    TMB = 665 + (9.6 * usuario.peso) + (1.8 * usuario.estatura) - (4.7 * edad);
+                    switch (usuario.id_objetivo)
+                    {
+                        case 1:
+                            calorias = TMB + 606;
+                            break;
+                        case 2:
+                            calorias = TMB + 1050;
+                            break;
+                        case 3:
+                            calorias = TMB + 1270;
+                            break;
+                        case 4:
+                            calorias = TMB + 1270;
+                            break;
+                    }
+                }
+                double carbohidratos = calorias * 0.55;
+                double proteinas = calorias * 0.25;
+                double grasas = calorias * 0.20;
+
+                string descripcion = "Ten encuenta " + usuario.persona.nombres + " que tienes que consumir la cantidad de " + calorias + " diarias, distribuidas en las siguientes cantidades calorias de macronutrientes: \n" +
+                                    "Carbohidratos: " + carbohidratos + "\nProteinas: " + proteinas + "\nGrasas: " + grasas;
+                List<String> dias = new List<String> { "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado" };
+
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    foreach (string dia in dias)
+                    {
+                        string sql = "SELECT TOP (1) id_plan_alimenticio FROM PLAN_ALIMENTICIO WHERE dia = @dia";
+                        using (SqlCommand cmd = new SqlCommand(sql, con))
+                        {
+                            cmd.Parameters.AddWithValue("@dia", dia);
+                            using (SqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                if (reader.Read())
+                                {
+                                    int id_plan_alimenticio = Convert.ToInt32(reader["id_plan_alimenticio"]);
+                                    resultado = await AsignarPlanAlimenticioDia(usuario.persona.id_usuario, id_plan_alimenticio, descripcion);
+                                }
+                            }
+                        }
+                    }
+                    await con.CloseAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return resultado;
+        }
+
+        public async Task<int> AsignarPlanAlimenticioDia(int id_usuario, int id_plan_alimenticio, string descripcion)
+        {
+            int resultado = 0;
+            try
+            {
+                string sql = "INSERT INTO USUARIO_PLAN_ALIMENTICIO (id_usuario,id_plan_alimenticio,descripcion) VALUES (@id_usuario,@id_plan_alimenticio,@descripcion)";
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@id_usuario", id_usuario);
+                        cmd.Parameters.AddWithValue("@id_plan_alimenticio", id_plan_alimenticio);
+                        cmd.Parameters.AddWithValue("@descripcion", descripcion);
+                        cmd.ExecuteNonQuery();
+                        resultado = 1;
+                    }
+                    await con.CloseAsync();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return resultado;
+        }
+
+        public async Task<PlanAlimenticioDto> BuscarPlanIdUsuario(int id_usuario, string dia)
+        {
+            PlanAlimenticioDto planAlimenticio = new PlanAlimenticioDto();
+            try
+            {
+                string sql = "SELECT pa.id_plan_alimenticio, pa.nombre, pa.dia, usp.descripcion " +
+                    "FROM PLAN_ALIMENTICIO AS pa " +
+                    "INNER JOIN USUARIO_PLAN_ALIMENTICIO AS usp ON pa.id_plan_alimenticio = usp.id_plan_alimenticio " +
+                    "WHERE usp.id_usuario = @id_usuario AND pa.dia = @dia";
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@id_usuario", id_usuario);
+                        cmd.Parameters.AddWithValue("@dia", dia);
+
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                planAlimenticio.id_plan_alimenticio = Convert.ToInt32(reader["id_plan_alimenticio"]);
+                                planAlimenticio.nombre = reader["nombre"].ToString();
+                                planAlimenticio.dia = reader["dia"].ToString();
+                                planAlimenticio.descripcion = reader["descripcion"].ToString();
+                                return planAlimenticio;
+                            }
+                        }
+                    }
+                    await con.CloseAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Write(ex.ToString());
+            }
+            return planAlimenticio;
+        }
+
+        public async Task<List<AlimentoDto>> ObtenerAlimentosDia(int id_plan_alimenticio)
+        {
+            List<AlimentoDto> listAlimentosDia = new List<AlimentoDto>();
+            try
+            {
+                string sql = "SELECT a.id_alimento, a.id_categoria_alimento, a.nombre,a.calorias_x_gramo, a.grasa, a.carbohidrato, a.proteina " +
+                    "FROM ALIMENTO AS a " +
+                    "INNER JOIN PLAN_ALIMENTO AS pa ON pa.id_alimento = a.id_alimento " +
+                    "WHERE pa.id_plan_alimenticio = @id_plan_alimenticio";
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@id_plan_alimenticio", id_plan_alimenticio);
+
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                AlimentoDto alimento = new AlimentoDto()
+                                {
+                                    id_alimento = Convert.ToInt32(reader["id_alimento"]),
+                                    id_categoria_alimento = Convert.ToInt32(reader["id_categoria_alimento"]),
+                                    nombre = reader["nombre"].ToString(),
+                                    calorias_x_gramo = Convert.ToDouble(reader["calorias_x_gramo"]),
+                                    grasa = Convert.ToDouble(reader["grasa"]),
+                                    carbohidrato = Convert.ToDouble(reader["carbohidrato"]),
+                                    proteina = Convert.ToDouble(reader["proteina"])
+                                };
+                                listAlimentosDia.Add(alimento);
+                            }
+                        }
+                        return listAlimentosDia;
+                    }
+                    await con.CloseAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return listAlimentosDia;
         }
     }
 }

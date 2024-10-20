@@ -59,6 +59,46 @@ namespace SPARTANFIT.Repository
             return UsuarioEncontrado > 0;
         }
 
+        public async Task<UsuarioDto> ObtenerUsuario(string correoUsuario)
+        {
+            UsuarioDto usuario = new UsuarioDto();
+            PersonaDto persona = new PersonaDto();
+
+            try
+            {
+                string sql = "SELECT  id_usuario, fecha_nacimiento, estatura, peso, genero, id_nivel_entrenamiento, id_objetivo, rehabilitacion FROM USUARIO WHERE correo = @correo ";
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@correo", correoUsuario);
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                persona.id_usuario = Convert.ToInt32(reader["id_usuario"]);
+                                persona.fecha_nacimiento = reader["fecha_nacimiento"].ToString();
+                                persona.genero = reader["genero"].ToString();
+                                usuario.estatura = Convert.ToDouble(reader["estatura"]);
+                                usuario.peso = Convert.ToDouble(reader["peso"]);
+                                usuario.id_nivel_entrenamiento = Convert.ToInt32(reader["id_nivel_entrenamiento"]);
+                                usuario.id_objetivo = Convert.ToInt32(reader["id_objetivo"]);
+                                usuario.rehabilitacion = Convert.ToInt32(reader["rehabilitacion"]);
+                                usuario.persona = persona;
+                            }
+                        }
+                    }
+                    await con.CloseAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return usuario;
+        }
+
         public async Task<List<UsuarioDto>> Mostrar_Usuarios()
         {
             List<UsuarioDto> listUsuarios = new List<UsuarioDto>();
@@ -155,7 +195,7 @@ namespace SPARTANFIT.Repository
 
             return usuario;
         }
-    }
 
-    
+        
+    }
 }

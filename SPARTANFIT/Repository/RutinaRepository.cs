@@ -231,5 +231,159 @@ namespace SPARTANFIT.Repository
             }
             return resultado;
         }
+
+        public async Task<int> AsignarRutina(UsuarioDto usuario)
+        {
+            int resultado = 0;
+            List<string> dias = new List<string> { "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado" };
+            try
+            {
+                if (usuario.rehabilitacion == 1)
+                {
+                    usuario.id_nivel_entrenamiento = 1;
+                }
+
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+
+                    foreach (string dia in dias)
+                    {
+                        string sql = "SELECT id_rutina FROM RUTINA WHERE id_nivel_rutina = @id_nivel_rutina AND id_objetivo = @id_objetivo AND dia = @dia";
+                        using (SqlCommand cmd = new SqlCommand(sql, con))
+                        {
+                            cmd.Parameters.AddWithValue("@id_nivel_rutina", usuario.id_nivel_entrenamiento);
+                            cmd.Parameters.AddWithValue("@id_objetivo", usuario.id_objetivo);
+                            cmd.Parameters.AddWithValue("@dia", dia);
+
+                            using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                            {
+                                if (await reader.ReadAsync())
+                                {
+                                    int id_rutina = Convert.ToInt32(reader["id_rutina"]);
+                                    resultado = await AsignarRutinaDia(usuario.persona.id_usuario, id_rutina);
+                                }
+                            }
+                        }
+                    }
+
+                    await con.CloseAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
+            return resultado;
+        }
+
+        public async Task<int> AsignarRutinaDia(int id_usuario, int id_rutina)
+        {
+            int resultado = 0;
+            try
+            {
+                string sql = "INSERT INTO USUARIO_RUTINA (id_usuario, id_rutina) VALUES (@id_usuario, @id_rutina)";
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@id_usuario", id_usuario);
+                        cmd.Parameters.AddWithValue("@id_rutina", id_rutina);
+
+                        await cmd.ExecuteNonQueryAsync();
+                        resultado = 1; 
+                    }
+                    await con.CloseAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
+            return resultado;
+        }
+
+
+        public async Task<RutinaDto>BuscarRutinaIdUsuario(int id_usuario, string dia)
+        {
+            RutinaDto rutinaDia = new RutinaDto();
+            try
+            {
+                string sql = "SELECT r.id_rutina, r.nombre_rutina, r.dia, r.descripcion FROM RUTINA AS r " +
+                    "INNER JOIN USUARIO_RUTINA AS ur ON ur.id_rutina = r.id_rutina " +
+                    "WHERE ur.id_usuario = @id_usuario and dia = @dia";
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@id_usuario", id_usuario);
+                        cmd.Parameters.AddWithValue("@dia", dia);
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                rutinaDia.id_rutina = Convert.ToInt32(reader["id_rutina"]);
+                                rutinaDia.nombre_rutina = reader["nombre_rutina"].ToString();
+                                rutinaDia.dia = reader["dia"].ToString();
+                                rutinaDia.descripcion = reader["descripcion"].ToString();
+                            }
+                        }
+                    }
+                    await con.CloseAsync();
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            return rutinaDia;
+        }
+
+        public async Task<List<EjercicioDto>>ObtenerEjerciciosDia(int id_rutina)
+        {
+            List<EjercicioDto> listEjerciciosDia = new List<EjercicioDto>();
+            try
+            {
+                string sql = "SELECT eje.id_ejercicio, eje.nombre_ejercicio, eje.id_grupo_muscular, eje.apoyo_visual, rue.num_series, rue.num_repeticiones " +
+                    "FROM EJERCICIO AS eje " +
+                    "INNER JOIN RUTINA_EJERCICIO AS rue ON rue.id_ejercicio = eje.id_ejercicio " +
+                    "WHERE rue.id_rutina = @id_rutina";
+
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@id_rutina", id_rutina);
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                EjercicioDto ejercicio = new EjercicioDto()
+                                {
+                                    id_ejercicio = Convert.ToInt32(reader["id_ejercicio"]),
+                                    nombre_ejercicio = reader["nombre_ejercicio"].ToString(),
+                                    id_grupo_muscular = Convert.ToInt32(reader["id_grupo_muscular"]),
+                                    apoyo_visual = reader["apoyo_visual"].ToString(),
+                                    num_series = Convert.ToInt32(reader["num_series"]),
+                                    repeticiones = Convert.ToInt32(reader["num_repeticiones"])
+                                };
+                                listEjerciciosDia.Add(ejercicio);
+                            }
+                        }
+                    }
+                    await con.CloseAsync();
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return listEjerciciosDia;
+        }
     }
 }
