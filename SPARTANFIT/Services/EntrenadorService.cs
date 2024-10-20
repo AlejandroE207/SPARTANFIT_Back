@@ -1,6 +1,7 @@
 ﻿using SPARTANFIT.Dto;
 using SPARTANFIT.Repository;
 using SPARTANFIT.Utilitys;
+using System.Numerics;
 
 namespace SPARTANFIT.Services
 {
@@ -9,11 +10,13 @@ namespace SPARTANFIT.Services
         private readonly EjercicioRepository _ejercicioRepository;
         private readonly AlimentoRepository _alimentoRepository;
         private readonly RutinaRepository _rutinaRepository;
-        public EntrenadorService (EjercicioRepository _ejericioRepository, AlimentoRepository alimentoRepository, RutinaRepository rutinaRepository)
+        private readonly PlanAlimenticioRepository _planAlimenticioRepository;
+        public EntrenadorService (EjercicioRepository _ejericioRepository, AlimentoRepository alimentoRepository, RutinaRepository rutinaRepository, PlanAlimenticioRepository planAlimenticioRepository)
         {
             _ejercicioRepository = _ejericioRepository;
             _alimentoRepository = alimentoRepository;
             _rutinaRepository = rutinaRepository;
+            _planAlimenticioRepository = planAlimenticioRepository;
         }
 
 
@@ -109,10 +112,48 @@ namespace SPARTANFIT.Services
             int resultadoEjerRut = await _rutinaRepository.RegistrarEjerciciosRutina(ejerciciosRutina, id_rutina);
             return resultadoEjerRut;
         }
-        /*
+        
         public async Task<List<RutinaDto>> MostrarRutinas()
         {
+            List<RutinaDto> listRutinas = new List<RutinaDto>();
+            listRutinas = await _rutinaRepository.MostrarRutinas();
+            return listRutinas;
+        }
 
-        }*/
+        public async Task<int> EliminarRutina(int id_rutina)
+        {
+            int resultado = 0;
+            resultado = await _rutinaRepository.EliminarRutina(id_rutina);
+            return resultado;
+        }
+
+        ///------------------------------ PLAN ALIMENTICIO -------------------------------
+        
+        public async Task<int> RegistrarPlanAlimenticio(PlanAlimenticioDto planAlimenticio, List<int> idAlimentos)
+        {
+            SintetizarFormulariosUtility sintetizar = new SintetizarFormulariosUtility();
+            planAlimenticio.nombre = sintetizar.Sintetizar(planAlimenticio.nombre);
+            planAlimenticio.dia = sintetizar.Sintetizar(planAlimenticio.dia);
+            planAlimenticio.descripcion = sintetizar.Sintetizar(planAlimenticio.descripcion);
+
+            int id_plan_alimenticio = await _planAlimenticioRepository.RegistrarPlan(planAlimenticio);
+
+            int registroAlimentoPlan = await _planAlimenticioRepository.RegistrarAlimentoPlan(idAlimentos,id_plan_alimenticio);
+            return registroAlimentoPlan;
+        }
+
+        public async Task<List<PlanAlimenticioDto>> MostrarPlanes()
+        {
+            List<PlanAlimenticioDto> listPlanes = new List<PlanAlimenticioDto>();
+            listPlanes = await _planAlimenticioRepository.MostrarPlanes();
+            return listPlanes;
+        }
+
+        public async Task<int> EliminarPlan(int id_plan_alimenticio)
+        {
+            int resultado = 0;
+            resultado = await _planAlimenticioRepository.EliminarPlan(id_plan_alimenticio);
+            return resultado;
+        }
     }
 }

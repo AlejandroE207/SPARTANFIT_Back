@@ -66,5 +66,57 @@ namespace SPARTANFIT_BACKEND.Controllers
             });
         }
 
+        [HttpGet("MostrarRutinaDia")]
+        public async Task<IActionResult> MostrarRutinaDia([FromQuery] int id_usuario)
+        {
+            try
+            {
+                UsuarioDto usuario = await _usuarioService.SeleccionarUsuarioAsync(id_usuario);
+                (RutinaDto rutinaDia, List<EjercicioDto> listEjerciciosDia) = await _usuarioService.MostrarRutinaDia(usuario);
+                if (rutinaDia == null || listEjerciciosDia == null || !listEjerciciosDia.Any())
+                {
+                    return NotFound("No se encontró la rutina o los ejercicios para el día.");
+                }
+                var response = new
+                {
+                    Rutina = rutinaDia,
+                    Ejercicios = listEjerciciosDia
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Se produjo un error al procesar la solicitud: {ex.Message}");
+            }
+        }
+
+        [HttpGet("MostrarPlanAlimenticioDia")]
+        public async Task<IActionResult> MostrarPlanAlimenticioDia([FromQuery] int id_usuario)
+        {
+            try
+            {
+                UsuarioDto usuario = await _usuarioService.SeleccionarUsuarioAsync(id_usuario);
+                (PlanAlimenticioDto planAlimenticioDia, List<AlimentoDto> listAlimenticioDia) = await _usuarioService.MostrarPlanALimenticioDia(usuario);
+                if(planAlimenticioDia == null || listAlimenticioDia == null || !listAlimenticioDia.Any())
+                {
+
+                    return NotFound("No se encontro el plan alimenticio o los alimentos para el dia");
+                }
+                var response = new
+                {
+                    PlanAlimenticio = planAlimenticioDia,
+                    Alimentos = listAlimenticioDia
+                };
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Se produjo un error al procesar la solicitud: {ex.Message}");
+            }
+        }
+
+
+
     }
 }

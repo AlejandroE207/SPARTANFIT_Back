@@ -47,9 +47,9 @@ namespace SPARTANFIT.Controllers
                 return Ok(new { mensaje = "Creacion de la rutina exitosa" });
             }
         }
-        /*
-        [HttpPost("MostrarRutinas")]
-        public async Task<List<RutinaDto>> MostrarRutinas()
+        
+        [HttpGet("MostrarRutinas")]
+        public async Task<IActionResult> MostrarRutinas()
         {
             List<RutinaDto>listRutinas = new List<RutinaDto>();
             listRutinas = await _entrenadorService.MostrarRutinas();
@@ -58,6 +58,18 @@ namespace SPARTANFIT.Controllers
                 return NotFound("No hay rutinas registradas por el momento");
             }
             return Ok(listRutinas);
-        }*/
+        }
+
+        [HttpPost("EliminarRutina")]
+        public async Task<IActionResult> EliminarRutina([FromQuery]int id_rutina)
+        {
+            int resultado = 0;
+            resultado = await _entrenadorService.EliminarRutina(id_rutina);
+            if(resultado == 0)
+            {
+                return NotFound("No se pudo eliminar la rutina de entrenamiento");
+            }
+            return Ok(new { mensaje = "Eliminacion exitosa" });
+        }
     }
 }
