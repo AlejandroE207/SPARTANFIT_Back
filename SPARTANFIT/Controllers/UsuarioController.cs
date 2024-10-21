@@ -66,6 +66,24 @@ namespace SPARTANFIT_BACKEND.Controllers
             });
         }
 
+        [HttpPost("ActualizarObjetivo")]
+        public async Task<IActionResult> ActualizarObjetivo([FromForm] int id_usuario,[FromForm]int rehabilitacion, [FromForm]int id_nivel_entrenamiento, [FromForm]int id_objetivo)
+        {
+            UsuarioDto usuario = new UsuarioDto();
+            usuario.persona = new PersonaDto();
+            usuario.persona.id_usuario = id_usuario;
+            usuario.rehabilitacion = rehabilitacion;
+            usuario.id_objetivo = id_objetivo;
+            usuario.id_nivel_entrenamiento = id_nivel_entrenamiento;
+
+            if(usuario.rehabilitacion == 1)
+            {
+                usuario.id_objetivo = 0;
+                usuario.id_nivel_entrenamiento = 0;
+            }
+            int resultado = _usuarioService.ActualizarObjetivo(usuario);
+        }
+
         [HttpGet("MostrarRutinaDia")]
         public async Task<IActionResult> MostrarRutinaDia([FromQuery] int id_usuario)
         {

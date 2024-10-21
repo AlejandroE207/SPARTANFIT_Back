@@ -166,6 +166,7 @@ namespace SPARTANFIT.Repository
                                 {
                                     persona = new PersonaDto
                                     {
+                                        id_usuario = Convert.ToInt32(reader["id_usuario"]),
                                         nombres = reader["nombres"].ToString(),
                                         apellidos = reader["apellidos"].ToString(),
                                         fecha_nacimiento = reader["fecha_nacimiento"].ToString(),
@@ -196,6 +197,86 @@ namespace SPARTANFIT.Repository
             return usuario;
         }
 
+        public async Task<int> ActualizarObjetivo(UsuarioDto usuario)
+        {
+            int resultado = 0;
+            try
+            {
+                string sql = "UPDATE USUARIO SET id_nivel_entrenamiento = @id_nivel_entrenamiento, id_objetivo = @id_objetivo, rehabilitacion = @rehabilitacion " + "WHERE id_usuario = @id_usuario";
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@id_nivel_entrenamiento", usuario.id_nivel_entrenamiento);
+                        cmd.Parameters.AddWithValue("@id_objetivo", usuario.id_objetivo);
+                        cmd.Parameters.AddWithValue("@rehabilitacion", usuario.rehabilitacion);
+                        cmd.Parameters.AddWithValue("@id_usuario", usuario.persona.id_usuario);
+                        cmd.ExecuteNonQuery();
+                        resultado = 1;
+                    }
+                    await con.CloseAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            return resultado;
+        }
+
+
+        public async Task<int>EliminarUsuario(int id_usuario)
+        {
+            int resultado = 0;
+            try
+            {
+                string sql = "UPDATE USUARIO SET correo = ' ' , contrasena = ' ' WHERE id_usuario = @id_usuario  ";
+                using(SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    using(SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@id_usuario", id_usuario);
+                        cmd.ExecuteNonQuery();
+                    }
+                    resultado = 1;
+                    await con.CloseAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            return resultado;
+        }
+
+        public async Task<int> ActualizarDatosUsuario(UsuarioDto usuario)
+        {
+            int resultado = 0;
+            try
+            {
+                string sql = "UPDATE USUARIO SET estatura=@estatura , peso=@peso" + "WHERE id_usuario = @id_usuario";
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    using( SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@estatura", usuario.estatura);
+                        cmd.Parameters.AddWithValue("@peso", usuario.peso);
+                        cmd.Parameters.AddWithValue("@id_usuario", usuario.persona.id_usuario);
+                        cmd.ExecuteNonQuery();
+                    }
+                    resultado = 1;
+                    await con.CloseAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            return resultado;
+        }
         
     }
 }
