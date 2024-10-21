@@ -48,7 +48,7 @@ namespace SPARTANFIT.Controllers
             }
         }
 
-        [HttpPatch("ActualizarEjercicio")]
+        [HttpPost("ActualizarEjercicio")]
         public async Task<IActionResult> ActualizarEjercicio([FromForm] int id_ejercicio, [FromForm] string nombre_ejercicio, [FromForm] int id_grupo_muscular, [FromForm] string apoyo_visual)
         {
             try
