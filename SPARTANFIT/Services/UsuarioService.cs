@@ -59,8 +59,33 @@ namespace SPARTANFIT.Services
         public async Task<int>ActualizarObjetivo(UsuarioDto usuario)
         {
             int resultado = 0;
-            resultado = _usuarioRepository.ActualizarObjetivo(usuario);
+            resultado = await _usuarioRepository.ActualizarObjetivo(usuario);
+            if(resultado != 0)
+            {
+                int resultadoAux = await _rutinaRepository.AsignarRutina(usuario);
+                int resultadoAlimento = await _planAlimenticioRepository.AsignarPlanAlimenticio(usuario);
+                if(resultadoAux == 1 && resultadoAlimento == 1) 
+                {
+                    resultado = 1;
+                }
+            }
+            return resultado;
         }
+
+        public async Task<int>ActualizarDatos(UsuarioDto usuario)
+        {
+            int resultado = 0;
+            resultado = await _usuarioRepository.ActualizarDatosUsuario(usuario);
+            return resultado;
+        }
+
+        public async Task<int> EliminarUsuario(int id_usuario)
+        {
+            int resultado = 0;
+            resultado = await _usuarioRepository.EliminarUsuario(id_usuario);
+            return resultado;
+        }
+
 
         public async Task<(RutinaDto, List<EjercicioDto>)> MostrarRutinaDia(UsuarioDto usuario)
         {

@@ -81,7 +81,51 @@ namespace SPARTANFIT_BACKEND.Controllers
                 usuario.id_objetivo = 0;
                 usuario.id_nivel_entrenamiento = 0;
             }
-            int resultado = _usuarioService.ActualizarObjetivo(usuario);
+            int resultado = await _usuarioService.ActualizarObjetivo(usuario);
+            if(resultado == 0)
+            {
+                return NotFound("No fue posible actualizar los datos del objetivo");
+            }
+            else
+            {
+                return Ok(new { mensaje = "Actualizacion exitosa" });
+            }
+        }
+
+        [HttpPost("EliminarUsuario")]
+        public async Task<IActionResult> EliminarCuenta([FromQuery] int id_usuario)
+        {
+            int resultado = 0;
+            resultado = await _usuarioService.EliminarUsuario(id_usuario);
+            if (resultado == 0)
+            {
+                return NotFound("No fue posible eliminar la cuenta");
+            }
+            else
+            {
+                return Ok(new { mensaje = "Eliminacion exitosa" });
+            }
+
+        }
+
+        [HttpPost("ActualizarDatos")]
+        public async Task<IActionResult> ActualizarDatos([FromForm]int id_usuario, [FromForm] double peso, [FromForm] double estatura)
+        {
+            int resultado = 0;
+            UsuarioDto usuario = new UsuarioDto();
+            usuario.persona = new PersonaDto();
+            usuario.persona.id_usuario = id_usuario;
+            usuario.peso = peso;
+            usuario.estatura = estatura;
+            resultado = await _usuarioService.ActualizarDatos(usuario);
+            if(resultado == 0)
+            {
+                return NotFound("No fue posible actualizar datos");
+            }
+            else
+            {
+                return Ok(new { mensaje = "Actualizacion de datos exitosa" });
+            }
         }
 
         [HttpGet("MostrarRutinaDia")]
