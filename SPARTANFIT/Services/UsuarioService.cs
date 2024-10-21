@@ -56,6 +56,12 @@ namespace SPARTANFIT.Services
             return usuario;
         }
 
+        public async Task<int>ActualizarObjetivo(UsuarioDto usuario)
+        {
+            int resultado = 0;
+            resultado = _usuarioRepository.ActualizarObjetivo(usuario);
+        }
+
         public async Task<(RutinaDto, List<EjercicioDto>)> MostrarRutinaDia(UsuarioDto usuario)
         {
             List<EjercicioDto> listEjerciciosDia = new List<EjercicioDto>();
