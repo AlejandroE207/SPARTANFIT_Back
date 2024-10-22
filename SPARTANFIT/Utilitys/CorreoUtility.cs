@@ -141,5 +141,32 @@ namespace SPARTANFIT.Utilitys
 
             return mensajeCon;
         }
+
+        public void EnviarCorreoConAdjunto(string destinatario, string asunto, string mensajeCorreo, string filePath, bool esHtml = true)
+        {
+            try
+            {
+                email = new MailMessage(User, destinatario, asunto, mensajeCorreo);
+                email.IsBodyHtml = esHtml;
+
+                // Comprobar si el archivo existe antes de adjuntarlo
+                if (File.Exists(filePath))
+                {
+                    Attachment attachment = new Attachment(filePath);
+                    email.Attachments.Add(attachment);
+                }
+                else
+                {
+                    throw new FileNotFoundException("El archivo PDF no se encontró en la ruta proporcionada.");
+                }
+
+                // Enviar el correo
+                cliente.Send(email);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error al enviar el correo: {ex.Message}");
+            }
+        }
     }
 }

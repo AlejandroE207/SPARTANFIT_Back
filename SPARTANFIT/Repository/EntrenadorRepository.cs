@@ -1,5 +1,7 @@
 ﻿
-using Microsoft.Data.SqlClient;
+//using Microsoft.Data.SqlClient;
+using System.Data.SqlClient;
+using System.Data;
 using SPARTANFIT.Dto;
 using System.Linq.Expressions;
 namespace SPARTANFIT.Repository
@@ -50,14 +52,16 @@ namespace SPARTANFIT.Repository
             int respuesta = 0;
             try
             {
-                string sql = "INSERT INTO USUARIO ( id_rol,nombres, apellidos, correo, contrasena, fecha_nacimiento, genero)"
-                            + "VALUES ( @id_rol,@nombres, @apellidos, @correo, @contrasena, @fecha_nacimiento,@genero)";
+                //string sql = "INSERT INTO USUARIO ( id_rol,nombres, apellidos, correo, contrasena, fecha_nacimiento, genero)"
+                //            + "VALUES ( @id_rol,@nombres, @apellidos, @correo, @contrasena, @fecha_nacimiento,@genero)";
 
                 using (SqlConnection con = new SqlConnection(_connectionString))
                 {
                     await con.OpenAsync();
-                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    using (SqlCommand cmd = new SqlCommand("dbo.sp_InsertarEntrenador", con))
                     {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
                         cmd.Parameters.AddWithValue("@id_rol", 2);
                         cmd.Parameters.AddWithValue("@nombres", entrenador.nombres);
                         cmd.Parameters.AddWithValue("@apellidos", entrenador.apellidos);
@@ -84,12 +88,14 @@ namespace SPARTANFIT.Repository
             int resultado = 0;
             try
             {
-                string sql = "UPDATE USUARIO SET nombres = @nombres, apellidos = @apellidos, correo = @correo WHERE id_usuario = @id_usuario";
+                //string sql = "UPDATE USUARIO SET nombres = @nombres, apellidos = @apellidos, correo = @correo WHERE id_usuario = @id_usuario";
                 using (SqlConnection con = new SqlConnection(_connectionString))
                 {
                     await con.OpenAsync();
-                    using(SqlCommand cmd = new SqlCommand(sql, con))
+                    using(SqlCommand cmd = new SqlCommand("dbo.sp_ActualizarEntrenador", con))
                     {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
                         cmd.Parameters.AddWithValue("@nombres", entrenador.nombres);
                         cmd.Parameters.AddWithValue("@apellidos", entrenador.apellidos);
                         cmd.Parameters.AddWithValue("@correo", entrenador.correo);

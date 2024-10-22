@@ -92,5 +92,12 @@ namespace SPARTANFIT.Services
             PersonaDto persona = await _personaRepository.SeleccionarPersonaAsync(correo);
             return persona;
         }
+
+        public async Task<PersonaDto> SeleccionarPersona(int id_persona)
+        {
+            PersonaDto persona = new PersonaDto();
+            persona = await _personaRepository.SeleccionarPersona(id_persona);
+            return persona;
+        }
     }
 }
