@@ -2,6 +2,7 @@
 using Microsoft.Identity.Client;
 using SPARTANFIT.Dto;
 using SPARTANFIT.Services;
+using SPARTANFIT.Utilitys;
 using System.ComponentModel.DataAnnotations.Schema;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -14,11 +15,15 @@ namespace SPARTANFIT.Controllers
     {
         private readonly AdministradorService _administradorService;
         private readonly UsuarioService _usuarioService;
+        private readonly CorreoUtility _correoUtility;
+        private readonly PersonaService _personaService;
 
-        public AdministradorController(AdministradorService administradorService, UsuarioService usuarioService)
+        public AdministradorController(AdministradorService administradorService, UsuarioService usuarioService, CorreoUtility correoUtility, PersonaService personaService)
         {
             _administradorService = administradorService;
             _usuarioService = usuarioService;
+            _correoUtility = correoUtility;
+            _personaService = personaService;
         }
 
         [HttpGet("ListUsuarios")]
@@ -136,6 +141,71 @@ namespace SPARTANFIT.Controllers
 
             return File(pdfBytes, "application/pdf", "Lista_Entrenadores.pdf");
         }
+
+        [HttpPost("CorreoReporteUsuarios")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult>CorreoReporteUsuarios([FromQuery] int id_usuario)
+        {
+            PersonaDto persona = new PersonaDto();
+            persona = await _personaService.SeleccionarPersona(id_usuario);
+            string pdfFilePath = await _administradorService.CrearPdfUsuarios();
+
+            if (string.IsNullOrEmpty(pdfFilePath) || !System.IO.File.Exists(pdfFilePath))
+            {
+                return StatusCode(500, "No se pudo generar el PDF de usuarios.");
+            }
+
+            string mensajeCorreo = "Adjunto se encuentra el reporte en PDF de los usuarios registrados.";
+            try
+            {
+                _correoUtility.EnviarCorreoConAdjunto(persona.correo, "Reporte de Usuarios Registrados", mensajeCorreo, pdfFilePath);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al enviar el correo: {ex.Message}");
+            }
+
+            System.IO.File.Delete(pdfFilePath);
+
+            return Ok(new { mensaje = "Reporte enviado correctamente." });
+        }
+
+        [HttpPost("CorreoReporteEntrenadores")]
+        public async Task<IActionResult> CorreoReporteEntrenadores([FromQuery] int id_usuario)
+        {
+
+            PersonaDto persona = new PersonaDto();
+            persona = await _personaService.SeleccionarPersona(id_usuario);
+            string pdfFilePath = await _administradorService.CrearPdfEntrenadores();
+
+            if (string.IsNullOrEmpty(pdfFilePath) || !System.IO.File.Exists(pdfFilePath))
+            {
+                return StatusCode(500, "No se pudo generar el PDF de entrenadores.");
+            }
+
+            string mensajeCorreo = "Adjunto se encuentra el reporte en PDF de los entrenadores registrados.";
+            try
+            {
+                byte[] pdfBytes = await System.IO.File.ReadAllBytesAsync(pdfFilePath);
+
+                _correoUtility.EnviarCorreoConAdjunto(persona.correo, "Reporte de Entrenadores Registrados", mensajeCorreo, pdfFilePath);
+
+                await Task.Delay(500); 
+                System.IO.File.Delete(pdfFilePath);
+            }
+            catch (IOException ioEx)
+            {
+                return StatusCode(500, $"Error al acceder o eliminar el archivo: {ioEx.Message}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al enviar el correo: {ex.Message}");
+            }
+
+            return Ok(new { mensaje = "Reporte enviado correctamente." });
+        }
+
 
     }
 }

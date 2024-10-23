@@ -1,5 +1,7 @@
-﻿using Microsoft.Data.SqlClient;
+﻿//using Microsoft.Data.SqlClient;
 using SPARTANFIT.Dto;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace SPARTANFIT.Repository
 {
@@ -12,35 +14,46 @@ namespace SPARTANFIT.Repository
         }
         public async Task<UsuarioDto> RegistroUsuarioAsync(UsuarioDto usuario)
         {
-            UsuarioDto usuarioResp = new UsuarioDto(); // Usuario de respuesta
-
-            string query = @"INSERT INTO USUARIO (id_rol, nombres, apellidos, correo, contrasena, fecha_nacimiento, estatura, peso, genero, id_nivel_entrenamiento, id_objetivo, rehabilitacion) 
-                       VALUES (@id_rol, @nombres, @apellidos, @correo, @contrasena, @fecha_nacimiento, @estatura, @peso, @genero, @id_nivel_entrenamiento, @id_objetivo, @rehabilitacion)";
-
-            using (SqlConnection con = new SqlConnection(_connectionString))
+            try
             {
-                await con.OpenAsync();
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@id_rol", usuario.persona.id_rol);
-                    cmd.Parameters.AddWithValue("@nombres", usuario.persona.nombres);
-                    cmd.Parameters.AddWithValue("@apellidos", usuario.persona.apellidos);
-                    cmd.Parameters.AddWithValue("@correo", usuario.persona.correo);
-                    cmd.Parameters.AddWithValue("@contrasena", usuario.persona.contrasena);
-                    cmd.Parameters.AddWithValue("@fecha_nacimiento", usuario.persona.fecha_nacimiento);
-                    cmd.Parameters.AddWithValue("@estatura", usuario.estatura);
-                    cmd.Parameters.AddWithValue("@peso", usuario.peso);
-                    cmd.Parameters.AddWithValue("@genero", usuario.persona.genero);
-                    cmd.Parameters.AddWithValue("@id_nivel_entrenamiento", usuario.id_nivel_entrenamiento);
-                    cmd.Parameters.AddWithValue("@id_objetivo", usuario.id_objetivo);
-                    cmd.Parameters.AddWithValue("@rehabilitacion", usuario.rehabilitacion);
-                    await cmd.ExecuteNonQueryAsync();
+                UsuarioDto usuarioResp = new UsuarioDto(); // Usuario de respuesta
 
+                //string query = @"INSERT INTO USUARIO (id_rol, nombres, apellidos, correo, contrasena, fecha_nacimiento, estatura, peso, genero, id_nivel_entrenamiento, id_objetivo, rehabilitacion) 
+                //       VALUES (@id_rol, @nombres, @apellidos, @correo, @contrasena, @fecha_nacimiento, @estatura, @peso, @genero, @id_nivel_entrenamiento, @id_objetivo, @rehabilitacion)";
+
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    using (SqlCommand cmd = new SqlCommand("dbo.sp_RegistrarUsuario", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.AddWithValue("@id_rol", usuario.persona.id_rol);
+                        cmd.Parameters.AddWithValue("@nombres", usuario.persona.nombres);
+                        cmd.Parameters.AddWithValue("@apellidos", usuario.persona.apellidos);
+                        cmd.Parameters.AddWithValue("@correo", usuario.persona.correo);
+                        cmd.Parameters.AddWithValue("@contrasena", usuario.persona.contrasena);
+                        cmd.Parameters.AddWithValue("@fecha_nacimiento", usuario.persona.fecha_nacimiento);
+                        cmd.Parameters.AddWithValue("@estatura", usuario.estatura);
+                        cmd.Parameters.AddWithValue("@peso", usuario.peso);
+                        cmd.Parameters.AddWithValue("@genero", usuario.persona.genero);
+                        cmd.Parameters.AddWithValue("@id_nivel_entrenamiento", usuario.id_nivel_entrenamiento);
+                        cmd.Parameters.AddWithValue("@id_objetivo", usuario.id_objetivo);
+                        cmd.Parameters.AddWithValue("@rehabilitacion", usuario.rehabilitacion);
+                        await cmd.ExecuteNonQueryAsync();
+
+                    }
+                    await con.CloseAsync();
                 }
-                await con.CloseAsync();
+            
                 return usuario;
 
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return usuario;
         }
         public async Task<bool> BuscarUsuario(string correo)
         {
@@ -202,12 +215,14 @@ namespace SPARTANFIT.Repository
             int resultado = 0;
             try
             {
-                string sql = "UPDATE USUARIO SET id_nivel_entrenamiento = @id_nivel_entrenamiento, id_objetivo = @id_objetivo, rehabilitacion = @rehabilitacion " + "WHERE id_usuario = @id_usuario";
+                //string sql = "UPDATE USUARIO SET id_nivel_entrenamiento = @id_nivel_entrenamiento, id_objetivo = @id_objetivo, rehabilitacion = @rehabilitacion " + "WHERE id_usuario = @id_usuario";
                 using (SqlConnection con = new SqlConnection(_connectionString))
                 {
                     await con.OpenAsync();
-                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    using (SqlCommand cmd = new SqlCommand("dbo.sp_ActualizarObjetivo", con))
                     {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
                         cmd.Parameters.AddWithValue("@id_nivel_entrenamiento", usuario.id_nivel_entrenamiento);
                         cmd.Parameters.AddWithValue("@id_objetivo", usuario.id_objetivo);
                         cmd.Parameters.AddWithValue("@rehabilitacion", usuario.rehabilitacion);
@@ -254,29 +269,39 @@ namespace SPARTANFIT.Repository
         public async Task<int> ActualizarDatosUsuario(UsuarioDto usuario)
         {
             int resultado = 0;
+            int id_usu = usuario.persona.id_usuario;
+            //string sql = "UPDATE USUARIO SET estatura=@estatura, peso=@peso WHERE id_usuario=@id_usuario";
+
             try
             {
-                string sql = "UPDATE USUARIO SET estatura=@estatura , peso=@peso" + "WHERE id_usuario = @id_usuario";
+
                 using (SqlConnection con = new SqlConnection(_connectionString))
                 {
                     await con.OpenAsync();
-                    using( SqlCommand cmd = new SqlCommand(sql, con))
+                    using (SqlCommand cmd = new SqlCommand("dbo.sp_ActualizarEstaturaYPeso", con))
                     {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
                         cmd.Parameters.AddWithValue("@estatura", usuario.estatura);
                         cmd.Parameters.AddWithValue("@peso", usuario.peso);
-                        cmd.Parameters.AddWithValue("@id_usuario", usuario.persona.id_usuario);
+                        cmd.Parameters.AddWithValue("@id_usuario", id_usu);
+
+                        Console.WriteLine($"Updating user {usuario.persona.id_usuario} with estatura: {usuario.estatura}, peso: {usuario.peso}");
+
                         cmd.ExecuteNonQuery();
+                        resultado = 1;
                     }
-                    resultado = 1;
                     await con.CloseAsync();
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Console.WriteLine($"Error al ejecutar la consulta SQL: {ex.Message}");
+                Console.WriteLine($"Parámetros: id_usuario={usuario.persona.id_usuario}, estatura={usuario.estatura}, peso={usuario.peso}");
             }
             return resultado;
         }
-        
+
+
     }
 }
