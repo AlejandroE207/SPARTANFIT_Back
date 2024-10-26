@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using SPARTANFIT.Repository;
 using SPARTANFIT.Services;
 
@@ -52,11 +53,56 @@ builder.Services.AddScoped<EntrenadorRepository>(provider =>
     return new EntrenadorRepository(connectionString);
 });
 
+builder.Services.AddScoped<EjercicioRepository>(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    var connectionString = configuration.GetConnectionString("DefaultConnection");
+    return new EjercicioRepository(connectionString);
+});
+
+builder.Services.AddScoped<AlimentoRepository>(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    var connectionString = configuration.GetConnectionString("DefaultConnection");
+    return new AlimentoRepository(connectionString);
+});
+
+builder.Services.AddScoped<RutinaRepository>(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    var connectionString = configuration.GetConnectionString("DefaultConnection");
+    return new RutinaRepository(connectionString);
+});
+
+builder.Services.AddScoped<PlanAlimenticioRepository>(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    var connectionString = configuration.GetConnectionString("DefaultConnection");
+    return new PlanAlimenticioRepository(connectionString);
+});
+
 builder.Services.AddScoped<PersonaService>();
 builder.Services.AddScoped<AdministradorService>();
+builder.Services.AddScoped<EntrenadorService>();
+builder.Services.AddScoped<SPARTANFIT.Utilitys.CorreoUtility>();
 
+
+// Configuración detallada de Swagger
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "SpartanFit API",
+        Version = "v1",
+        Description = "API para la gestión de usuarios y funcionalidades de SpartanFit.",
+        Contact = new OpenApiContact
+        {
+            Name = "SpartanFit Support",
+            Email = "spartanfitsoporte@gmail.com"
+        }
+    });
+});
 
 var app = builder.Build();
 
@@ -64,7 +110,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "SpartanFit API v1");
+        c.RoutePrefix = string.Empty; // Hacer que Swagger esté en la raíz
+    });
 }
 
 app.UseHttpsRedirection();
