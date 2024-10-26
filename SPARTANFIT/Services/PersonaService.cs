@@ -31,9 +31,9 @@ namespace SPARTANFIT.Services
         {
             PersonaDto persona = new PersonaDto();
             CorreoUtility correoUtility = new CorreoUtility();
-            SintetizarFormulariosUtility sintetizarFormulariosUtility=new SintetizarFormulariosUtility();
+            SintetizarFormulariosUtility sintetizarFormulariosUtility = new SintetizarFormulariosUtility();
             GeneradorCodigoUtility generadorCodigoUtility = new GeneradorCodigoUtility();
-            correo=sintetizarFormulariosUtility.Sintetizar(correo);
+            correo = sintetizarFormulariosUtility.Sintetizar(correo);
 
             if (await _personaRepository.BuscarPersonaAsync(correo))
             {
@@ -89,8 +89,15 @@ namespace SPARTANFIT.Services
         }
         public async Task<PersonaDto> EnviarPersonas(string correo)
         {
-            PersonaDto persona = await _personaRepository.SeleccionarPersonaAsync( correo);
-            return persona; 
-        } 
+            PersonaDto persona = await _personaRepository.SeleccionarPersonaAsync(correo);
+            return persona;
+        }
+
+        public async Task<PersonaDto> SeleccionarPersona(int id_persona)
+        {
+            PersonaDto persona = new PersonaDto();
+            persona = await _personaRepository.SeleccionarPersona(id_persona);
+            return persona;
+        }
     }
 }
