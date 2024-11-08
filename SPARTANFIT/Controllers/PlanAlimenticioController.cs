@@ -62,5 +62,28 @@ namespace SPARTANFIT.Controllers
             }
             return Ok(new { mensaje = "Eliminacion exitosa" });
         }
+
+        [HttpGet("DetallesPlanAlimenticio")]
+        public async Task<IActionResult> DetallesPlan([FromQuery]int id_plan_alimenticio)
+        {
+            try
+            {
+                (PlanAlimenticioDto plan, List<AlimentoDto> listAlimentos) = await _entrenadorService.DetallesPlanAlimenticio(id_plan_alimenticio);
+                if(plan == null || listAlimentos == null || !listAlimentos.Any())
+                {
+                    return NotFound("No se encontro los detalles del plan alimenticio");
+                }
+                var response = new
+                {
+                    plan = plan,
+                    alimentos = listAlimentos
+                };
+                return Ok(response);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500,$"Se produjo un error al procesar la solicitud: {ex.Message}");
+            }
+        }
     }
 }
