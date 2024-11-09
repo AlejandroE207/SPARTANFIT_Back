@@ -94,10 +94,11 @@ namespace SPARTANFIT.Repository
             return resultado;
         }
 
-        public async Task<int>ActualizarEjercicio(EjercicioDto ejercicio)
+        public async Task<int> ActualizarEjercicio(EjercicioDto ejercicio)
         {
             int resultado = 0;
-            string sql = "UPDATE EJERCICIO SET nombre_ejercicio = @nombre_ejercicio, apoyo_visual = @apoyo_visual  " + "WHERE id_ejercicio = @id_ejercicio";
+            string sql = "UPDATE EJERCICIO SET nombre_ejercicio = @nombre_ejercicio, apoyo_visual = @apoyo_visual WHERE id_ejercicio = @id_ejercicio";
+
             try
             {
                 using (SqlConnection con = new SqlConnection(_connectionString))
@@ -105,21 +106,33 @@ namespace SPARTANFIT.Repository
                     await con.OpenAsync();
                     using (SqlCommand cmd = new SqlCommand(sql, con))
                     {
-                        cmd.Parameters.AddWithValue("@nombre_ejercicio",ejercicio.nombre_ejercicio);
+                        cmd.Parameters.AddWithValue("@nombre_ejercicio", ejercicio.nombre_ejercicio);
                         cmd.Parameters.AddWithValue("@apoyo_visual", ejercicio.apoyo_visual);
                         cmd.Parameters.AddWithValue("@id_ejercicio", ejercicio.id_ejercicio);
-                        cmd.ExecuteNonQuery();
+
+                        // Ejecuta la consulta y obtiene el número de filas afectadas
+                        int rowsAffected = await cmd.ExecuteNonQueryAsync();
+
+                        // Verifica si la actualización tuvo éxito
+                        if (rowsAffected > 0)
+                        {
+                            resultado = 1; // Indica éxito si al menos una fila fue actualizada
+                        }
+                        else
+                        {
+                            throw new Exception("No se encontró el registro con el id proporcionado.");
+                        }
                     }
-                    await con.CloseAsync();
                 }
-                resultado = 1;
             }
-            catch(SqlException ex)
+            catch (SqlException ex)
             {
                 throw new Exception("Error al actualizar ejercicio", ex);
             }
+
             return resultado;
         }
+
 
         public async Task<List<EjercicioDto>> MostrarEjercicios()
         {

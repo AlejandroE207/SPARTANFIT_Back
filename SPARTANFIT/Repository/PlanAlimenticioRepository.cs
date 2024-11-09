@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using SPARTANFIT.Dto;
+using System.Security.Cryptography;
 
 namespace SPARTANFIT.Repository
 {
@@ -370,6 +371,41 @@ namespace SPARTANFIT.Repository
                                 planAlimenticio.dia = reader["dia"].ToString();
                                 planAlimenticio.descripcion = reader["descripcion"].ToString();
                                 return planAlimenticio;
+                            }
+                        }
+                    }
+                    await con.CloseAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Write(ex.ToString());
+            }
+            return planAlimenticio;
+        }
+
+        public async Task<PlanAlimenticioDto>BuscarPlanId(int id_plan)
+        {
+            PlanAlimenticioDto planAlimenticio = new PlanAlimenticioDto();
+            try
+            {
+                string sql = "SELECT pa.id_plan_alimenticio, pa.nombre, pa.dia " +
+                    "FROM PLAN_ALIMENTICIO AS pa  WHERE id_plan_alimenticio = @id_plan_alimenticio";
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@id_plan_alimenticio", id_plan);
+
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                planAlimenticio.id_plan_alimenticio = Convert.ToInt32(reader["id_plan_alimenticio"]);
+                                planAlimenticio.nombre = reader["nombre"].ToString();
+                                planAlimenticio.dia = reader["dia"].ToString();
+                                planAlimenticio.descripcion = reader["descripcion"].ToString();
                             }
                         }
                     }

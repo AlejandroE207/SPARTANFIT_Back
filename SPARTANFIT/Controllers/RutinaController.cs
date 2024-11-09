@@ -71,5 +71,28 @@ namespace SPARTANFIT.Controllers
             }
             return Ok(new { mensaje = "Eliminacion exitosa" });
         }
+
+        [HttpGet("DetallesRutina")]
+        public async Task<IActionResult> DetallesRutina([FromQuery] int id_rutina)
+        {
+            try
+            {
+                (RutinaDto rutina, List<EjercicioDto> listEjercicios) = await _entrenadorService.DetallesRutina(id_rutina);
+                if(rutina == null || listEjercicios == null || !listEjercicios.Any())
+                {
+                    return NotFound("No se encontro los detalles de la rutina");
+                }
+                var response = new
+                {
+                    rutina = rutina,
+                    ejercicios = listEjercicios
+                };
+                return Ok(response);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500,$"Se produjo un error al procesar la solicitud: {ex.Message}");
+            }
+        }
     }
 }

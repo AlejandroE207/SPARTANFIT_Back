@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using SPARTANFIT.Dto;
+using System.Security.Cryptography;
 
 namespace SPARTANFIT.Repository
 {
@@ -385,5 +386,41 @@ namespace SPARTANFIT.Repository
             }
             return listEjerciciosDia;
         }
+
+        public async Task<RutinaDto>BuscarRutinaId(int id_rutina)
+        {
+            RutinaDto rutina = new RutinaDto();
+            try
+            {
+                string sql = "SELECT r.id_rutina, r.nombre_rutina, r.id_nivel_rutina, r.id_objetivo, r.dia, r.descripcion FROM RUTINA AS r  WHERE id_rutina = @id_rutina";
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    await con.OpenAsync();
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@id_rutina", id_rutina);
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                rutina.id_rutina = Convert.ToInt32(reader["id_rutina"]);
+                                rutina.nombre_rutina = reader["nombre_rutina"].ToString();
+                                rutina.id_nivel_rutina = Convert.ToInt32(reader["id_nivel_rutina"]);
+                                rutina.id_objetivo = Convert.ToInt32(reader["id_objetivo"]);
+                                rutina.dia = reader["dia"].ToString();
+                                rutina.descripcion = reader["descripcion"].ToString();
+                            }
+                        }
+                    }
+                    await con.CloseAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            return rutina;
+        }
+
     }
 }

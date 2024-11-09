@@ -127,6 +127,16 @@ namespace SPARTANFIT.Services
             return resultado;
         }
 
+        public async Task<(RutinaDto,List<EjercicioDto>)>DetallesRutina(int id_rutina)
+        {
+            RutinaDto rutina = new RutinaDto();
+            List<EjercicioDto> listEjercicios = new List<EjercicioDto>();
+
+            rutina = await _rutinaRepository.BuscarRutinaId(id_rutina);
+            listEjercicios = await _rutinaRepository.ObtenerEjerciciosDia(id_rutina);
+            return (rutina, listEjercicios);
+        }
+
         ///------------------------------ PLAN ALIMENTICIO -------------------------------
         
         public async Task<int> RegistrarPlanAlimenticio(PlanAlimenticioDto planAlimenticio, List<int> idAlimentos)
@@ -154,6 +164,17 @@ namespace SPARTANFIT.Services
             int resultado = 0;
             resultado = await _planAlimenticioRepository.EliminarPlan(id_plan_alimenticio);
             return resultado;
+        }
+
+        public async Task<(PlanAlimenticioDto, List<AlimentoDto>)> DetallesPlanAlimenticio(int id_plan_alimenticio)
+        {
+            PlanAlimenticioDto planAlimenticio = new PlanAlimenticioDto();
+            List<AlimentoDto> listAlimentos = new List<AlimentoDto>();
+
+            planAlimenticio = await _planAlimenticioRepository.BuscarPlanId(id_plan_alimenticio);
+            listAlimentos = await _planAlimenticioRepository.ObtenerAlimentosDia(id_plan_alimenticio);
+
+            return(planAlimenticio, listAlimentos);
         }
     }
 }
