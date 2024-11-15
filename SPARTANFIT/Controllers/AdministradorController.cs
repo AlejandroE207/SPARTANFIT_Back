@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using SPARTANFIT.Dto;
 using SPARTANFIT.Services;
@@ -11,6 +12,7 @@ namespace SPARTANFIT.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    
     public class AdministradorController : ControllerBase
     {
         private readonly AdministradorService _administradorService;
@@ -27,6 +29,7 @@ namespace SPARTANFIT.Controllers
         }
 
         [HttpGet("ListUsuarios")]
+        
         public async Task<IActionResult> Mostrar_Usuarios()
         {
             List<UsuarioDto> listUsuarios = new List<UsuarioDto>();
@@ -40,7 +43,9 @@ namespace SPARTANFIT.Controllers
             return Ok(listUsuarios);
         }
 
+
         [HttpGet("ListEntrenadores")]
+        
         public async Task<IActionResult> Mostrar_Entrenadores()
         {
             List<PersonaDto> listEntrenadores = new List<PersonaDto>();
@@ -54,6 +59,7 @@ namespace SPARTANFIT.Controllers
             return Ok(listEntrenadores);
 
         }
+
 
         [HttpPost("RegistrarEntrenador")]
         public async Task<IActionResult> Registrar_entrenador([FromBody]PersonaDto entrenador)
@@ -79,6 +85,7 @@ namespace SPARTANFIT.Controllers
 
         }
 
+
         [HttpPost("ActualizarEntrenador")]
         public async Task<IActionResult> Actualizar_entrenador([FromForm]int id_usuario, [FromForm]string nombres, [FromForm]string apellidos, [FromForm]string correo)
         {
@@ -99,6 +106,7 @@ namespace SPARTANFIT.Controllers
             }
         }
 
+
         [HttpPost("EliminarEntrenador")]
         public async Task<IActionResult> Eliminar_Entrenador([FromQuery]int id)
         {
@@ -114,6 +122,7 @@ namespace SPARTANFIT.Controllers
             }
         }
 
+
         [HttpGet("ReporteUsuarios")]
         public async Task<IActionResult> Generar_Reporte_Usuarios()
         {
@@ -127,6 +136,7 @@ namespace SPARTANFIT.Controllers
 
             return File(pdfBytes, "application/pdf", "Lista_Usuarios.pdf");
         }
+
 
         [HttpGet("ReporteEntrenadores")]
         public async Task<IActionResult> Generar_Reporte_Entrenadores()
@@ -143,6 +153,7 @@ namespace SPARTANFIT.Controllers
         }
 
         [HttpPost("CorreoReporteUsuarios")]
+
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult>CorreoReporteUsuarios([FromQuery] int id_usuario)
@@ -171,6 +182,7 @@ namespace SPARTANFIT.Controllers
             return Ok(new { mensaje = "Reporte enviado correctamente." });
         }
 
+        
         [HttpPost("CorreoReporteEntrenadores")]
         public async Task<IActionResult> CorreoReporteEntrenadores([FromQuery] int id_usuario)
         {
