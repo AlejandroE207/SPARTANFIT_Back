@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SPARTANFIT.Dto;
 using SPARTANFIT.Repository;
 using SPARTANFIT.Services;
+using SPARTANFIT.Utilitys;
 
 
 namespace SPARTANFIT.Controllers
@@ -11,13 +13,16 @@ namespace SPARTANFIT.Controllers
     public class PersonaController : ControllerBase
     {
         private readonly PersonaService _personaService;
+        private readonly TokenUtility _tokenUtility;
 
-        public PersonaController(PersonaService personaService)
+        public PersonaController(PersonaService personaService, TokenUtility tokenUtility)
         {
             _personaService = personaService;
+            _tokenUtility = tokenUtility;
         }
 
         [HttpPost("IniciarSesion")]
+        
         public async Task<IActionResult> IniciarSesion([FromForm] string correo, [FromForm] string contrasena)
         {
             if (string.IsNullOrEmpty(correo) || string.IsNullOrEmpty(contrasena))
@@ -31,7 +36,13 @@ namespace SPARTANFIT.Controllers
 
                 if (resultado)
                 {
-                    return Ok("Inicio de sesión exitoso.");
+                    var token = _tokenUtility.GenerarToken(correo);
+                    Console.WriteLine("Token: "+ token);
+                    return Ok(new
+                    {
+                        Mensaje = "Inicio de sesión exitoso",
+                        Token = token
+                    });
                 }
                 else
                 {
